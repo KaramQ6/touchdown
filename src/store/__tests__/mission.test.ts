@@ -17,6 +17,7 @@ vi.hoisted(() => {
 })
 
 import { computeReadiness } from '../../engine/score'
+import { ESCALATION } from '../../engine/constants'
 import { createSeedMission } from '../../data/seed-crew'
 import { STORAGE_KEY, selectActive, useMission } from '../mission'
 
@@ -102,5 +103,113 @@ describe('mission store', () => {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!).state
     expect(saved.mission.crew[0].logs.at(-1).sleepHours).toBe(8)
     expect(saved).not.toHaveProperty('whatIf')
+  })
+
+  describe('commitments and re-measure clock', () => {
+    const HOUR = 3_600_000
+    const activeId = () => state().mission.activeId
+    const commitment = { day: 140, change: { exerciseMin: 30 }, targetRLand: 70 }
+
+    it('commit stores a commitment for the active astronaut only', () => {
+      const other = state().mission.crew[1].id
+      state().commit(commitment)
+      expect(state().commitments[activeId()]).toEqual({ ...commitment, checkIn: undefined })
+      expect(state().commitments[other]).toBeUndefined()
+    })
+
+    it('commit replaces a previous commitment and clears its checkIn', () => {
+      state().commit(commitment)
+      state().addLog({ ...today(), sleepHours: 8 })
+      expect(state().commitments[activeId()].checkIn).toBeDefined()
+      state().commit({ ...commitment, targetRLand: 80 })
+      expect(state().commitments[activeId()].targetRLand).toBe(80)
+      expect(state().commitments[activeId()].checkIn).toBeUndefined()
+    })
+
+    it('first check-in after commit sets checkIn to the stored log, and a second one does not overwrite it', () => {
+      state().commit(commitment)
+      state().addLog({ ...today(), sleepHours: 8 })
+      const first = today()
+      expect(state().commitments[activeId()].checkIn).toEqual(first)
+      state().addLog({ ...today(), sleepHours: 5 })
+      expect(state().commitments[activeId()].checkIn).toEqual(first)
+    })
+
+    it('check-in without a commitment creates none', () => {
+      state().addLog({ ...today(), sleepHours: 8 })
+      expect(state().commitments).toEqual({})
+    })
+
+    it('setTodayPvt does not set checkIn', () => {
+      state().commit(commitment)
+      state().setTodayPvt({ medianMs: 280, lapses: 0, falseStarts: 0 })
+      expect(state().commitments[activeId()].checkIn).toBeUndefined()
+    })
+
+    it('setTodayPvt does not clear the re-measure clock', () => {
+      state().armRemeasure(1_000)
+      state().setTodayPvt({ medianMs: 280, lapses: 0, falseStarts: 0 })
+      expect(state().remeasureDueAt[activeId()]).toBe(1_000 + ESCALATION.remeasureHours * HOUR)
+    })
+
+    it('armRemeasure sets now + remeasureHours for the active astronaut', () => {
+      state().armRemeasure(1_000)
+      expect(state().remeasureDueAt[activeId()]).toBe(1_000 + ESCALATION.remeasureHours * HOUR)
+      expect(state().remeasureDueAt[state().mission.crew[1].id]).toBeUndefined()
+    })
+
+    it('armRemeasure is idempotent: a second call does not restart the clock', () => {
+      state().armRemeasure(1_000)
+      state().armRemeasure(9_000_000)
+      expect(state().remeasureDueAt[activeId()]).toBe(1_000 + ESCALATION.remeasureHours * HOUR)
+    })
+
+    it('addLog clears the clock for the active astronaut only', () => {
+      const second = state().mission.crew[1].id
+      state().armRemeasure(1_000)
+      state().setActive(second)
+      state().armRemeasure(2_000)
+      state().setActive(state().mission.crew[0].id)
+      state().addLog({ ...today(), sleepHours: 8 })
+      expect(state().remeasureDueAt[state().mission.crew[0].id]).toBeUndefined()
+      expect(state().remeasureDueAt[second]).toBe(2_000 + ESCALATION.remeasureHours * HOUR)
+    })
+
+    it('setActive does not touch commitments or the clock', () => {
+      const second = state().mission.crew[1].id
+      state().commit(commitment)
+      state().armRemeasure(1_000)
+      const { commitments, remeasureDueAt } = state()
+      state().setActive(second)
+      expect(state().commitments).toEqual(commitments)
+      expect(state().remeasureDueAt).toEqual(remeasureDueAt)
+    })
+
+    it('resetDemo clears commitments and the clock', () => {
+      state().commit(commitment)
+      state().armRemeasure(1_000)
+      state().resetDemo()
+      expect(state().commitments).toEqual({})
+      expect(state().remeasureDueAt).toEqual({})
+    })
+
+    it('persists commitments and the clock', () => {
+      state().commit(commitment)
+      state().armRemeasure(1_000)
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!).state
+      expect(saved.commitments[activeId()]).toMatchObject(commitment)
+      expect(saved.remeasureDueAt[activeId()]).toBe(1_000 + ESCALATION.remeasureHours * HOUR)
+    })
+
+    it('hydrates a legacy v1 payload without the new keys with empty maps', async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ state: { mission: createSeedMission(), isDemo: true }, version: 1 }),
+      )
+      await useMission.persist.rehydrate()
+      expect(state().commitments).toEqual({})
+      expect(state().remeasureDueAt).toEqual({})
+      expect(state().mission).toEqual(createSeedMission())
+    })
   })
 })

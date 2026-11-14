@@ -78,3 +78,6 @@ export const INDICATOR_LABEL: Record<IndicatorKey, string> = {
 
 /** Fixed order for iterating indicators (V average, drivers, escalation). */
 export const INDICATORS: readonly IndicatorKey[] = ['hr', 'bp', 'glucose', 'temp', 'sleep', 'mood']
+
+// --- Today's Action candidates (recommend.ts) ---
+export const RECOMMEND = { exerciseStepMin: 30, exerciseMaxMin: 180, sleepTargetsH: [7, 8], minGain: 1 } as const // recommend_rules

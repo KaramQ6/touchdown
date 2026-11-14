@@ -23,11 +23,12 @@ flags in 3 levels (handle it myself / alert crew / contact Earth) with a live co
 | M2 | Reaction Test (PVT) | 60 s full mode, 15 s demo mode (toggle). Random stimulus interval 2-10 s. Records median RT (ms) and lapses (RT >= 500 ms). False starts (tap before stimulus) counted separately, not as RT. |
 | M3 | Readiness: R ring + M, S, V sub-scores | Updates after check-in. Each sub-score shows its biggest driver in one line. Band label: Ready / Limited / Not Ready. |
 | M4 | Landing Projection + what-if | Line chart of projected R from today to landing day. Sliders: exercise minutes/day (0-180), sleep hours (4-9). Moving a slider updates R_land live. Shows band change if it crosses 50 or 75. |
-| M5 | Escalation | Current level 0-3, rule that triggered it, action card. Level 3 shows comm-delay timer (one-way and round trip). |
+| M5 | Escalation | Current level 0-3, rule that triggered it, action card. Level 3 shows comm-delay timer (one-way and round trip). Level 2 shows a 4-hour re-measure countdown and a "Re-measure now" button that opens Check-in. |
 | M6 | Body Map | Original simple SVG silhouette (no copyrighted art), 5 tappable regions: bones, calf muscles, inner ear/balance, heart, mind. Each opens status, plain explanation, source badge. |
 | M7 | Trends | One chart per indicator across mission days. 120 seeded days visible on first launch. |
 | M8 | Offline-first PWA | Full app works with Wi-Fi off after first load. |
 | M9 | Source badges | Every number on screen has a "Why this number?" tap that opens its `sources.ts` entry with status and link. |
+| M10 | Today's Action | Home shows one recommended change (best of: exercise +30 min/day capped at 180, exercise to 120, sleep to 7 h, sleep to 8 h, or the best exercise+sleep pair) with before -> after R_land and band chips, or "Hold course" if no candidate gains >= 1 point. "Commit" stores {day, change, targetRLand}. The next check-in after a commitment shows "done / not done" by comparing that log's sleep and exercise to the commitment (done = every committed value met or exceeded). |
 
 ### Should
 | ID | Feature | Acceptance criteria |
@@ -114,9 +115,32 @@ Do not change formulas to make the story bigger. Tune seed data only.
 
 Highest triggered level wins. Show which rule fired.
 
+Level 2 re-measure clock: starts the first time the app shows level 2 for that astronaut, persists across navigation and reloads, and is cleared by the next check-in.
+
 ### 4.7 Communication delay
 `commDelayMin` one-way, default 12, allowed range 3-22 (physical Earth-Mars light time). Round trip = 2x.
 Level 3 timer counts down the round trip: "Earliest reply from Earth in mm:ss".
+
+### 4.8 Today's Action (recommendation)
+Candidates (exactly these, no others):
+- Exercise +30 min/day, capped at 180
+- Exercise to 120 min/day
+- Sleep to 7 h
+- Sleep to 8 h
+- Best exercise+sleep pair: one exercise candidate combined with one sleep candidate, the combination with the highest R_land
+
+Rules:
+1. Drop any candidate that would lower the current value (e.g. exercise to 120 when current is 150; sleep to 7 when current is 8).
+2. Evaluate each remaining candidate with the 4.3 projection (S and V held, what-if exercise and sleep values applied).
+3. Gain = R_land(candidate) - R_land(current). Rank by gain, highest first.
+4. Exact ties go to the smaller change: singles before pairs, lower values first.
+5. If the top gain is < 1 point, show "Hold course". Otherwise show the top candidate with before -> after R_land and band chips.
+
+Demo target: seed hero (day 140 of 210, exercise 60 min/day, sleep 5.5 h) shows "Exercise 120 min a day and sleep 7 h a night", 48.86 Not Ready -> 58.32 Limited.
+
+**Decisions**
+- A check-in on the same mission day counts as the next check-in (the demo keeps the mission day fixed at 140).
+- With the demo seed, sleep 7 h is chosen over 8 h because both make sleep green, so R_land is identical and the tie goes to the smaller change.
 
 ---
 
@@ -147,6 +171,13 @@ interface Mission {
   activeId: string;
 }
 
+interface Commitment {
+  day: number;
+  change: { exerciseMin?: number; sleepHours?: number };
+  targetRLand: number;
+  checkIn?: DailyLog;
+}
+
 interface Readiness {
   R: number; M: number; S: number; V: number;
   band: 'ready' | 'limited' | 'not-ready';
@@ -162,6 +193,8 @@ interface SourceEntry {
   citation: string; url?: string; note?: string;
 }
 ```
+
+Mission state keeps commitments and re-measure due times (epoch ms) as maps keyed by astronaut id.
 
 ## 6. Thresholds
 
@@ -201,6 +234,7 @@ HR 30-220, systolic 60-250, diastolic 30-150, glucose 30-500, temp 33-42, sleep 
 | comm_delay | 3-22 min one-way | VERIFIED | Physics: Earth-Mars light time at closest/farthest distance. |
 | vitals_ranges | table 6.1 | VERIFY | AHA (HR, BP), ADA (glucose), AASM/SRS (sleep >= 7 h). Team adds links. |
 | partial_gravity_gap | effects of 0.38 g not directly studied in humans | VERIFIED | NASA HRP gap (GapMA-101). Shown as an honest limitation. |
+| recommend_rules | candidates and 1-point minimum gain | ASSUMPTION | Team design choice for decision support. |
 
 ---
 
@@ -231,7 +265,7 @@ touchdown/
 ```
 
 ## 9. Screens
-1. Home: big R ring with band, M/S/V cards (number + driver line), "Day 140 of 210, 70 days to landing", escalation pill, streak.
+1. Home: big R ring with band, M/S/V cards (number + driver line), "Day 140 of 210, 70 days to landing", escalation pill, streak. Today's Action card under the ring (sentence, before -> after R_land with band chips, Commit), and a commitment outcome line after the next check-in.
 2. Check-in: 7 inputs, source chips, wearable-sim toggle, submit returns to Home with animated R change.
 3. Reaction Test: full/demo toggle, tap target, results card (median, lapses, new S).
 4. Projection: curve today to T, band zones shaded (red < 50, amber 50-75, green >= 75), 2 sliders, R_land big number, honest note.

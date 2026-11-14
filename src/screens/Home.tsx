@@ -7,6 +7,7 @@ import type { ScreenProps } from '../components/Nav'
 import { ScoreRing } from '../components/ScoreRing'
 import { SourceBadge } from '../components/SourceBadge'
 import { BAND_LABEL, BAND_TONE, LEVEL_TONE, StatusChip, TONE_TEXT } from '../components/StatusChip'
+import { TodayAction } from '../components/TodayAction'
 import { useActiveAstronaut, useMission } from '../store/mission'
 import type { Axis } from '../engine/types'
 
@@ -84,6 +85,8 @@ export function Home({ onNavigate }: ScreenProps) {
           </div>
         </div>
       </div>
+
+      <TodayAction onNavigate={onNavigate} />
 
       <div className="grid gap-4 md:grid-cols-3">
         {readiness.drivers.map(({ axis, text }) => (

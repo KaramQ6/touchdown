@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { evaluateEscalation } from '../../engine/escalation'
 import { projectLanding } from '../../engine/projection'
+import { recommend } from '../../engine/recommend'
 import { baselineRt, computeReadiness, exerciseAdherence } from '../../engine/score'
 import { indicatorStatuses, validateVitals } from '../../engine/thresholds'
 import { DEMO_FEVER_C, createSeedMission } from '../seed-crew'
@@ -95,5 +96,16 @@ describe('demo story targets (SPEC 4.5, PROMPTS 2)', () => {
     const p = projectLanding(hero.logs, { ...days, whatIf: { exerciseMin: 120, sleepHours: 8 } })!
     expect(p.band).toBe('limited')
     expect(Math.abs(p.rLand - 58.32)).toBeLessThanOrEqual(0.5)
+  })
+})
+
+describe('hero Today\'s Action (recommend, SPEC 4.5)', () => {
+  it('suggests exercise 120 + sleep 7, after within 0.01 of 58.32, Limited', () => {
+    const rec = recommend(hero.logs, days)
+    expect(rec?.kind).toBe('change')
+    if (rec?.kind !== 'change') return
+    expect(rec.change).toEqual({ exerciseMin: 120, sleepHours: 7 })
+    expect(rec.after.band).toBe('limited')
+    expect(Math.abs(rec.after.rLand - 58.32)).toBeLessThanOrEqual(0.01)
   })
 })

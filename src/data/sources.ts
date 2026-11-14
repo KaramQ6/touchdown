@@ -176,6 +176,13 @@ export const SOURCES: readonly SourceEntry[] = [
     status: 'ASSUMPTION',
     citation: 'Team design choice for decision support, not a clinical protocol.',
   },
+  {
+    id: 'recommend_rules',
+    label: 'Today\'s Action candidates',
+    value: 'exercise +30 min/day (max 180) or to 120 min/day; sleep 7 h or 8 h; best single or exercise+sleep pair; ignored if gain < 1 point',
+    status: 'ASSUMPTION',
+    citation: 'Team design choice for decision support.',
+  },
 ]
 
 const BY_ID = new Map(SOURCES.map((s) => [s.id, s]))
