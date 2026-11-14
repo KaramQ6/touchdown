@@ -6,6 +6,7 @@ import { CheckIn } from './screens/CheckIn'
 import { ReactionTest } from './screens/ReactionTest'
 import { BodyMap } from './screens/BodyMap'
 import { Escalation } from './screens/Escalation'
+import { Crew } from './screens/Crew'
 import { useMission } from './store/mission'
 
 // Chart screens pull in Recharts; load them on demand (the service worker still precaches the chunks).
@@ -20,6 +21,7 @@ const SCREEN_COMPONENTS: Record<ScreenId, ComponentType<ScreenProps>> = {
   bodymap: BodyMap,
   trends: Trends,
   escalation: Escalation,
+  crew: Crew,
 }
 
 function TopBar() {

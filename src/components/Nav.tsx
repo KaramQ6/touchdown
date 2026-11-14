@@ -6,6 +6,7 @@ export const SCREENS = [
   { id: 'bodymap', label: 'Body Map' },
   { id: 'trends', label: 'Trends' },
   { id: 'escalation', label: 'Escalation' },
+  { id: 'crew', label: 'Crew' },
 ] as const
 
 export type ScreenId = (typeof SCREENS)[number]['id']
