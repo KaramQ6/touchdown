@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { indicatorBands, indicatorStatuses, indicatorValue, statusOf, validateVitals, type VitalsInput } from '../thresholds'
+import { indicatorBands, indicatorSource, indicatorStatuses, indicatorValue, statusOf, validateVitals, type VitalsInput } from '../thresholds'
 import { INDICATORS } from '../constants'
 
 describe('indicatorBands: chart zones built from SPEC 6.1 thresholds', () => {
@@ -36,6 +36,17 @@ describe('indicatorBands: chart zones built from SPEC 6.1 thresholds', () => {
 
 describe('indicatorValue', () => {
   it('reads systolic for bp', () => expect(indicatorValue('bp', makeLog({ systolic: 133 }))).toBe(133))
+})
+
+describe('indicatorSource (SPEC S1)', () => {
+  const log = makeLog({ hrSource: 'wearable-sim', tempSource: 'manual' })
+  it('reads hrSource for hr and tempSource for temp', () => {
+    expect(indicatorSource('hr', log)).toBe('wearable-sim')
+    expect(indicatorSource('temp', makeLog({ tempSource: 'wearable-sim' }))).toBe('wearable-sim')
+  })
+  it('treats indicators without a sensor as manual', () => {
+    for (const k of ['bp', 'glucose', 'sleep', 'mood'] as const) expect(indicatorSource(k, log)).toBe('manual')
+  })
 })
 import type { IndicatorKey, Status } from '../types'
 import { makeLog } from './helpers'

@@ -1,8 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { VALIDATION_RANGES } from '../engine/constants'
 import { validateVitals, type VitalField, type VitalsErrors, type VitalsInput } from '../engine/thresholds'
-import type { DailyLog } from '../engine/types'
+import type { DailyLog, Source } from '../engine/types'
+import { wearableReading } from '../engine/wearable'
 import type { ScreenProps } from '../components/Nav'
+import { SimChip } from '../components/SimChip'
 import { useActiveAstronaut, useMission } from '../store/mission'
 
 const NUMBER_FIELDS: { field: Exclude<VitalField, 'mood'>; step: number }[] = [
@@ -18,6 +20,10 @@ const FIELD_ORDER = [...NUMBER_FIELDS.map((f) => f.field), 'mood'] as VitalField
 const MOODS = [1, 2, 3, 4, 5] as const
 
 type Draft = Record<VitalField, string>
+type SensorField = 'heartRate' | 'tempC'
+type Sources = Record<SensorField, Source>
+
+const isSensor = (f: VitalField): f is SensorField => f === 'heartRate' || f === 'tempC'
 
 const toDraft = (log: DailyLog | undefined): Draft =>
   Object.fromEntries(FIELD_ORDER.map((f) => [f, log ? String(log[f]) : ''])) as Draft
@@ -31,13 +37,32 @@ export function CheckIn({ onNavigate }: ScreenProps) {
   const currentDay = useMission((s) => s.mission.currentDay)
   const addLog = useMission((s) => s.addLog)
   const astronaut = useActiveAstronaut()
-  const [draft, setDraft] = useState<Draft>(() => toDraft(astronaut.logs.find((l) => l.day === currentDay) ?? astronaut.logs.at(-1)))
+  const today = astronaut.logs.find((l) => l.day === currentDay)
+  const [draft, setDraft] = useState<Draft>(() => toDraft(today ?? astronaut.logs.at(-1)))
+  // Only today's own entry carries its sources over; anything else starts as manual.
+  const [sources, setSources] = useState<Sources>(() => ({
+    heartRate: today?.hrSource ?? 'manual',
+    tempC: today?.tempSource ?? 'manual',
+  }))
   const [errors, setErrors] = useState<VitalsErrors | null>(null)
+  const reading = useMemo(() => wearableReading(astronaut.logs, currentDay, astronaut.id), [astronaut.logs, astronaut.id, currentDay])
+  const wearableOn = sources.heartRate === 'wearable-sim' || sources.tempC === 'wearable-sim'
 
-  const update = (field: VitalField, value: string) => {
-    const next = { ...draft, [field]: value }
+  const applyDraft = (next: Draft) => {
     setDraft(next)
     if (errors) setErrors(validateVitals(parse(next)))
+  }
+
+  const update = (field: VitalField, value: string) => {
+    // Typing over a simulated value makes it a manual entry.
+    if (isSensor(field)) setSources((s) => ({ ...s, [field]: 'manual' }))
+    applyDraft({ ...draft, [field]: value })
+  }
+
+  const toggleWearable = () => {
+    if (wearableOn || !reading) return setSources({ heartRate: 'manual', tempC: 'manual' })
+    setSources({ heartRate: 'wearable-sim', tempC: 'wearable-sim' })
+    applyDraft({ ...draft, heartRate: String(reading.heartRate), tempC: String(reading.tempC) })
   }
 
   const submit = (e: FormEvent) => {
@@ -54,8 +79,8 @@ export function CheckIn({ onNavigate }: ScreenProps) {
       ...input,
       day: currentDay,
       mood: input.mood as DailyLog['mood'],
-      hrSource: 'manual',
-      tempSource: 'manual',
+      hrSource: sources.heartRate,
+      tempSource: sources.tempC,
     })
     onNavigate('home')
   }
@@ -66,6 +91,27 @@ export function CheckIn({ onNavigate }: ScreenProps) {
       <h1 className="mt-1 text-2xl font-semibold">Daily check-in</h1>
 
       <form onSubmit={submit} noValidate className="mt-8 flex flex-col gap-6">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border border-line bg-panel/80 p-4">
+          <button
+            type="button"
+            aria-pressed={wearableOn}
+            aria-describedby="wearable-hint"
+            disabled={!reading}
+            onClick={toggleWearable}
+            className={`flex items-center gap-3 border px-4 py-2 font-mono text-xs tracking-[0.15em] uppercase transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-accent ${
+              wearableOn ? 'border-accent bg-accent/10 text-accent' : 'border-edge text-dim hover:text-ink'
+            }`}
+          >
+            <span aria-hidden className={`size-2 rounded-full ${wearableOn ? 'bg-accent' : 'bg-edge'}`} />
+            Wearable (simulated)
+          </button>
+          <p id="wearable-hint" className="flex-1 text-sm text-dim">
+            {reading
+              ? 'Fills heart rate and temperature from a simulated wristband. You can still type your own values.'
+              : 'Needs at least one earlier check-in to simulate a reading.'}
+          </p>
+        </div>
+
         <div className="grid gap-5 sm:grid-cols-2">
           {NUMBER_FIELDS.map(({ field, step }) => {
             const { label, unit, min, max } = VALIDATION_RANGES[field]
@@ -76,11 +122,14 @@ export function CheckIn({ onNavigate }: ScreenProps) {
                   <label htmlFor={`field-${field}`} className="text-sm">
                     {label} <span className="text-dim">({unit})</span>
                   </label>
-                  {(field === 'heartRate' || field === 'tempC') && (
-                    <span className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[10px] tracking-[0.15em] text-dim uppercase">
-                      Manual
-                    </span>
-                  )}
+                  {isSensor(field) &&
+                    (sources[field] === 'manual' ? (
+                      <span className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[10px] tracking-[0.15em] text-dim uppercase">
+                        Manual
+                      </span>
+                    ) : (
+                      <SimChip source={sources[field]} />
+                    ))}
                 </div>
                 <input
                   id={`field-${field}`}

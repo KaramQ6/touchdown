@@ -3,8 +3,10 @@ import { ACTION_LEVEL_CARDS, INDICATOR_GUIDANCE, type ActionCard } from '../data
 import { DEMO_FEVER_C } from '../data/seed-crew'
 import { ESCALATION } from '../engine/constants'
 import { evaluateEscalation } from '../engine/escalation'
+import { indicatorSource } from '../engine/thresholds'
 import type { Escalation as EscalationResult } from '../engine/types'
 import { DelayTimer } from '../components/DelayTimer'
+import { SimChip } from '../components/SimChip'
 import { formatDuration, useNow } from '../components/Countdown'
 import type { ScreenProps } from '../components/Nav'
 import { SourceBadge } from '../components/SourceBadge'
@@ -84,7 +86,7 @@ export function Escalation({ onNavigate }: ScreenProps) {
         {isDemo && today && (
           <button
             type="button"
-            onClick={() => addLog({ ...today, tempC: DEMO_FEVER_C })}
+            onClick={() => addLog({ ...today, tempC: DEMO_FEVER_C, tempSource: 'manual' })}
             className="border border-dashed border-warn/60 px-4 py-2 font-mono text-xs tracking-[0.15em] text-warn uppercase hover:bg-warn/10 focus-visible:outline-2 focus-visible:outline-accent"
           >
             Demo: fever {DEMO_FEVER_C} C
@@ -109,7 +111,10 @@ export function Escalation({ onNavigate }: ScreenProps) {
       </ol>
 
       <div className="border border-line bg-panel/80 p-6">
-        <p className="font-mono text-[11px] tracking-[0.25em] text-dim uppercase">Rule that fired</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-mono text-[11px] tracking-[0.25em] text-dim uppercase">Rule that fired</p>
+          {today && escalation.indicator && <SimChip source={indicatorSource(escalation.indicator, today)} />}
+        </div>
         <p className={`mt-2 text-xl font-semibold ${tone}`}>{escalation.rule}</p>
         <p className="mt-1 text-sm">{escalation.action}</p>
       </div>

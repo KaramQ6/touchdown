@@ -183,6 +183,13 @@ export const SOURCES: readonly SourceEntry[] = [
     status: 'ASSUMPTION',
     citation: 'Team design choice for decision support.',
   },
+  {
+    id: 'wearable_sim',
+    label: 'Simulated wearable stream',
+    value: 'HR and temp = own 7-day average + seeded noise (up to 3 bpm, 0.1 C)',
+    status: 'ASSUMPTION',
+    citation: 'Team design choice. No real device is paired; every value from this stream is labeled SIMULATED.',
+  },
 ]
 
 const BY_ID = new Map(SOURCES.map((s) => [s.id, s]))

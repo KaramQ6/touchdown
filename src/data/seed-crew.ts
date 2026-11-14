@@ -1,4 +1,5 @@
 import { COMM_DELAY_DEFAULT_MIN, LANDING_DAY_DEFAULT } from '../engine/constants'
+import { mulberry32 } from '../engine/random'
 import type { Astronaut, DailyLog, Mission } from '../engine/types'
 
 // DEMO DATA: 4 astronauts x 120 logged days ending on mission day 140. Fully deterministic.
@@ -9,18 +10,6 @@ export const DEMO_FEVER_C = 38.6
 const CURRENT_DAY = 140
 const LOGGED_DAYS = 120
 const FIRST_DAY = CURRENT_DAY - LOGGED_DAYS + 1 // 21
-
-/** Small seeded PRNG (mulberry32). Same seed, same sequence; never Math.random. */
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
 
 interface Profile {
   id: string

@@ -11,9 +11,10 @@ import {
   type TooltipContentProps,
 } from 'recharts'
 import { INDICATORS, VALIDATION_RANGES } from '../engine/constants'
-import { INDICATOR_FIELD, indicatorBands, indicatorValue, statusOf, type StatusBand } from '../engine/thresholds'
+import { INDICATOR_FIELD, indicatorBands, indicatorSource, indicatorValue, statusOf, type StatusBand } from '../engine/thresholds'
 import type { IndicatorKey, Status } from '../engine/types'
 import type { ScreenProps } from '../components/Nav'
+import { SimChip } from '../components/SimChip'
 import { SourceBadge } from '../components/SourceBadge'
 import { StatusChip } from '../components/StatusChip'
 import { useActiveAstronaut, useMission } from '../store/mission'
@@ -59,7 +60,10 @@ export function Trends(_: ScreenProps) {
   const astronaut = useActiveAstronaut()
   const [key, setKey] = useState<IndicatorKey>('hr')
 
-  const data = useMemo(() => astronaut.logs.map((l) => ({ day: l.day, value: indicatorValue(key, l) })), [astronaut.logs, key])
+  const data = useMemo(
+    () => astronaut.logs.map((l) => ({ day: l.day, value: indicatorValue(key, l), source: indicatorSource(key, l) })),
+    [astronaut.logs, key],
+  )
   const bands = useMemo(() => indicatorBands(key), [key])
   const y = useMemo(() => yAxis(key, data.map((d) => d.value), bands), [key, data, bands])
   const { label, unit } = meta(key)
@@ -68,12 +72,14 @@ export function Trends(_: ScreenProps) {
   const ChartTooltip = ({ active, payload, label: day }: TooltipContentProps) => {
     if (!active || !payload?.length) return null
     const v = Number(payload[0].value)
+    const simulated = (payload[0].payload as (typeof data)[number]).source === 'wearable-sim'
     return (
       <div className="border border-line bg-panel px-3 py-2 font-mono text-xs">
         <p className="text-dim">Day {day}</p>
         <p className="text-ink">
           {fmt(v)} {unit} · {STATUS_TEXT[statusOf(key, v)]}
         </p>
+        {simulated && <p className="text-dim uppercase">Simulated</p>}
       </div>
     )
   }
@@ -116,6 +122,7 @@ export function Trends(_: ScreenProps) {
               </span>
             )}
             {latest && <StatusChip tone={statusOf(key, latest.value)}>{STATUS_TEXT[statusOf(key, latest.value)]}</StatusChip>}
+            {latest && <SimChip source={latest.source} />}
           </div>
           <SourceBadge title={`${label} ranges`} ids={['vitals_ranges']} />
         </div>

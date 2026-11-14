@@ -1,5 +1,5 @@
 import { INDICATORS, VALIDATION_RANGES, VITALS } from './constants'
-import type { DailyLog, IndicatorKey, Status } from './types'
+import type { DailyLog, IndicatorKey, Source, Status } from './types'
 
 /** SPEC 6.1: status of one indicator value. For 'bp' the value is systolic. */
 export function statusOf(key: IndicatorKey, value: number): Status {
@@ -48,6 +48,10 @@ export const INDICATOR_FIELD = {
 } as const satisfies Record<IndicatorKey, keyof DailyLog>
 
 export const indicatorValue = (key: IndicatorKey, log: DailyLog): number => log[INDICATOR_FIELD[key]]
+
+/** SPEC S1: where an indicator's value came from. Only HR and temp have a sensor source. */
+export const indicatorSource = (key: IndicatorKey, log: DailyLog): Source =>
+  key === 'hr' ? log.hrSource : key === 'temp' ? log.tempSource : 'manual'
 
 export function indicatorStatuses(log: DailyLog): Record<IndicatorKey, Status> {
   return Object.fromEntries(INDICATORS.map((k) => [k, statusOf(k, indicatorValue(k, log))])) as Record<

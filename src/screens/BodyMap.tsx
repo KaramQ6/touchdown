@@ -2,8 +2,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState, type KeyboardEvent } from 'react'
 import { BODY_REGIONS, regionDetail, regionStatus, type BodyRegion, type BodyRegionId } from '../data/body-regions'
 import { computeReadiness } from '../engine/score'
+import { indicatorSource } from '../engine/thresholds'
 import type { Status } from '../engine/types'
 import type { ScreenProps } from '../components/Nav'
+import { SimChip } from '../components/SimChip'
 import { SourceBadge } from '../components/SourceBadge'
 import { StatusChip } from '../components/StatusChip'
 import { useActiveAstronaut, useMission } from '../store/mission'
@@ -74,6 +76,8 @@ export function BodyMap(_: ScreenProps) {
 
   const selectedId = picked ?? worst
   const selected = BODY_REGIONS.find((r) => r.id === selectedId) as BodyRegion
+  const today = astronaut.logs.find((l) => l.day === currentDay)
+  const simulated = !!today && !!selected.indicators?.some((k) => indicatorSource(k, today) === 'wearable-sim')
   const onKey = (id: BodyRegionId) => (e: KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
@@ -148,7 +152,10 @@ export function BodyMap(_: ScreenProps) {
                 <SourceBadge title={selected.label} ids={selected.sourceIds} />
               </div>
             </div>
-            <p className="font-mono text-lg">{regionDetail(selected, { logs: astronaut.logs, day: currentDay, readiness })}</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="font-mono text-lg">{regionDetail(selected, { logs: astronaut.logs, day: currentDay, readiness })}</p>
+              {simulated && <SimChip source="wearable-sim" />}
+            </div>
             <p className="text-sm text-dim">
               Feeds sub-score <span className="text-ink">{selected.axis}</span>: {selected.driver}
             </p>

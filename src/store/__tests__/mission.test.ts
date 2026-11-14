@@ -49,6 +49,14 @@ describe('mission store', () => {
     expect(days).toHaveLength(121)
   })
 
+  it('addLog keeps per-field sources (SPEC S1) and they survive a reload', () => {
+    state().addLog({ ...today(), hrSource: 'wearable-sim', tempSource: 'manual' })
+    expect(today()).toMatchObject({ hrSource: 'wearable-sim', tempSource: 'manual' })
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!).state.mission
+    const active = saved.crew.find((a: { id: string }) => a.id === saved.activeId)
+    expect(active.logs.at(-1)).toMatchObject({ hrSource: 'wearable-sim', tempSource: 'manual' })
+  })
+
   it('addLog only touches the active astronaut', () => {
     const others = state().mission.crew.slice(1)
     state().addLog({ ...today(), sleepHours: 8 })

@@ -81,3 +81,6 @@ export const INDICATORS: readonly IndicatorKey[] = ['hr', 'bp', 'glucose', 'temp
 
 // --- Today's Action candidates (recommend.ts) ---
 export const RECOMMEND = { exerciseStepMin: 30, exerciseMaxMin: 180, sleepTargetsH: [7, 8], minGain: 1 } as const // recommend_rules
+
+// --- Simulated wearable stream (SPEC S1) ---
+export const WEARABLE_SIM = { baselineDays: 7, hrNoiseBpm: 3, tempNoiseC: 0.1 } as const // wearable_sim
