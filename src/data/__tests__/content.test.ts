@@ -8,7 +8,7 @@ import { SOURCES, sourceById } from '../sources'
 // SPEC section 7, statuses exactly as given (updated after the research pass, 2026-11-14).
 const SPEC_7: [string, 'VERIFIED' | 'ASSUMPTION' | 'VERIFY'][] = [
   ['bone_loss', 'VERIFIED'],
-  ['calf_strength', 'VERIFY'],
+  ['calf_strength', 'VERIFIED'],
   ['balance_most_affected', 'VERIFIED'],
   ['landing_readiness_tests', 'VERIFIED'],
   ['no_combined_model', 'VERIFIED'],

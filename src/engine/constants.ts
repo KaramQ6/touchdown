@@ -38,7 +38,7 @@ export const COMM_DELAY_RANGE_MIN = { min: 3, max: 22 } as const // comm_delay
 // a value belongs to the band whose written edge it has not yet passed (e.g. temp 37.25 is green).
 export const VITALS = {
   hr: { greenMin: 60, greenMax: 100, yellowMin: 50, yellowMax: 110 }, // vitals_ranges
-  systolic: { redBelow: 90, yellowFrom: 130, redFrom: 140 }, // vitals_ranges
+  systolic: { redBelow: 90, yellowFrom: 120, redFrom: 140 }, // vitals_ranges (yellow from 120: AHA "elevated")
   glucose: { redBelow: 70, yellowFrom: 100, redFrom: 126 }, // vitals_ranges
   temp: { redBelow: 35.5, greenFrom: 36.1, yellowFrom: 37.3, redFrom: 38.0 }, // vitals_ranges
   sleep: { yellowFrom: 6, greenFrom: 7 }, // vitals_ranges

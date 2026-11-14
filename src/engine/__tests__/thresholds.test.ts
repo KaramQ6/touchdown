@@ -71,7 +71,9 @@ const BOUNDARIES: [IndicatorKey, number, Status][] = [
   // Systolic: green 90-129, yellow 130-139, red < 90 or >= 140
   ['bp', 89, 'red'],
   ['bp', 90, 'green'],
-  ['bp', 129, 'green'],
+  ['bp', 119, 'green'],
+  ['bp', 120, 'yellow'], // AHA "elevated" starts at 120 (team decision 2026-11-14)
+  ['bp', 129, 'yellow'],
   ['bp', 130, 'yellow'],
   ['bp', 139, 'yellow'],
   ['bp', 140, 'red'],

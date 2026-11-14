@@ -202,11 +202,13 @@ Mission state keeps commitments and re-measure due times (epoch ms) as maps keye
 | Indicator | Green | Yellow | Red |
 |---|---|---|---|
 | Resting HR (bpm) | 60-100 | 50-59 or 101-110 | < 50 or > 110 |
-| Systolic BP (mmHg) | 90-129 | 130-139 | < 90 or >= 140 |
+| Systolic BP (mmHg) | 90-119 | 120-139 | < 90 or >= 140 |
 | Fasting glucose (mg/dL) | 70-99 | 100-125 | < 70 or >= 126 |
 | Temp (C) | 36.1-37.2 | 37.3-37.9, or 35.5-36.0 | < 35.5 or >= 38.0 |
 | Sleep (h) | >= 7 | 6-6.9 | < 6 |
 | Mood (1-5) | 4-5 | 3 | 1-2 |
+
+Decision 2026-11-14: systolic yellow starts at 120 to match the AHA "elevated" category (was 130).
 
 ### 6.2 Boundaries are inclusive as written. Write a test per boundary.
 
@@ -221,7 +223,7 @@ Updated 2026-11-14 after the research pass: every VERIFIED row below was opened 
 | id | Value | Status | Citation / URL |
 |---|---|---|---|
 | bone_loss | 1-1.5%/month, model uses 1.25 | VERIFIED | NASA, Risk of Spaceflight-Induced Bone Changes. https://www.nasa.gov/reference/risk-of-spaceflight-induced-bone-changes/ . Note: varies by site (hip ~1.4-1.5%, spine ~0.9%, Lang et al. 2004). |
-| calf_strength | model uses 20% (upper-end value) | VERIFY | Fitts et al. 2010, J Physiol. https://pmc.ncbi.nlm.nih.gov/articles/PMC2988519/ . The paper reports soleus type I fibre atrophy 20% and single-fibre peak force down 35% after ~180 days (n=9). It does not give a whole-muscle 7-20% figure; a whole-muscle source is still needed. |
+| calf_strength | 20-29% after ~6 months, model uses 20 | VERIFIED | Trappe S et al. 2009, J Appl Physiol 106(4):1159-1168. https://pubmed.ncbi.nlm.nih.gov/19150852/ . Calf force-velocity performance fell 20-29% in 9 ISS crew who exercised in flight; the model applies 20% with no exercise, so it may understate the loss. Fibre-level data: Fitts et al. 2010 (PMC2988519). |
 | balance_most_affected | balance-dependent tasks changed most (qualitative) | VERIFIED | NASA One-Year Mission functional performance. https://www.nasa.gov/humans-in-space/nasas-one-year-mission-investigates-how-space-affects-astronauts-functional-performance/ |
 | landing_readiness_tests | qualitative | VERIFIED | NASA, New tests evaluate mission readiness of astronauts upon landing. https://www.nasa.gov/humans-in-space/new-tests-evaluate-mission-readiness-of-astronauts-upon-landing/ |
 | no_combined_model | predicting post-landing performance is still being studied (qualitative) | VERIFIED | Wood SJ et al., Assessing the Relationships Between Sensorimotor Biomarkers and Post-Landing Functional Task Performance, NASA HRP IWS 2024 (NTRS 20230014343). https://ntrs.nasa.gov/citations/20230014343 |
@@ -232,9 +234,9 @@ Updated 2026-11-14 after the research pass: every VERIFIED row below was opened 
 | weights | 0.40 / 0.35 / 0.25 | ASSUMPTION | Justified by FTT findings, not validated. |
 | coefficients | 3, 1.5, 150, 5 | ASSUMPTION | Calibrated to give a sensible 0-100 range. |
 | pvt_lapse | 500 ms | VERIFIED | Basner M, Dinges DF. Maximizing Sensitivity of the PVT to Sleep Loss. Sleep 2011;34(5):581-591. https://pmc.ncbi.nlm.nih.gov/articles/PMC3079937/ . Defined for the 10-minute PVT; our test is shorter. |
-| transit | ~6 months weightless transit | VERIFIED | NASA HRP, Hazard: Gravity Fields ("six-month trek"). https://www.nasa.gov/hrp/hazard-gravity-fields/ |
+| transit | ~6 months weightless transit | VERIFIED | NASA HRP, Hazard: Gravity Fields ("six-month trek"). https://www.nasa.gov/hrp/hazard-gravity-fields/ . Mars gravity 0.38 g: NASA Mars Fact Sheet (3.73 m/s2, 0.380 of Earth), https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html |
 | comm_delay | 3-22 min one-way | VERIFY | Physics: Earth-Mars light time at closest/farthest distance (about 3.1 min at 56 million km, 22.3 min at 401 million km). No published page cited yet. |
-| vitals_ranges | table 6.1 | VERIFY | AHA (HR, BP), ADA (glucose), AASM/SRS (sleep >= 7 h), MedlinePlus (temp). Green temp 36.1-37.2 C matches MedlinePlus and green HR 60-100 matches AHA; yellow and red edges are team choices. AHA calls systolic 120-129 "elevated", while table 6.1 keeps it green. |
+| vitals_ranges | table 6.1 | VERIFY | AHA (HR, BP), ADA (glucose), AASM/SRS (sleep >= 7 h), MedlinePlus (temp). Green temp 36.1-37.2 C matches MedlinePlus and green HR 60-100 matches AHA; yellow and red edges are team choices. Systolic yellow starts at 120 to match the AHA "elevated" category. |
 | partial_gravity_gap | long-duration effects at 0.38 g not studied in humans | VERIFY | NASA Human Research Roadmap (gap ID not confirmed). Short partial-gravity exposures have been tested, so the claim is limited to long stays. Shown as an honest limitation. |
 | recommend_rules | candidates and 1-point minimum gain | ASSUMPTION | Team design choice for decision support. |
 

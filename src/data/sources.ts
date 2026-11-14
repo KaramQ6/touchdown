@@ -17,11 +17,11 @@ export const SOURCES: readonly SourceEntry[] = [
   {
     id: 'calf_strength',
     label: 'Calf strength loss',
-    value: 'model uses 20% (upper-end value)',
-    status: 'VERIFY',
-    citation: 'Fitts et al. 2010, J Physiol.',
-    url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC2988519/',
-    note: 'The paper reports soleus type I fibre atrophy of 20% and single-fibre peak force down 35% after ~180 days (n=9). It gives no whole-muscle calf strength figure, so a source for that is still needed.',
+    value: '20-29% after ~6 months, model uses 20',
+    status: 'VERIFIED',
+    citation: 'Trappe S, et al. Exercise in space: human skeletal muscle after 6 months aboard the International Space Station. J Appl Physiol 2009;106(4):1159-1168.',
+    url: 'https://pubmed.ncbi.nlm.nih.gov/19150852/',
+    note: 'Calf force-velocity performance fell 20-29% and peak power 32% in 9 ISS crew who exercised in flight. The model applies 20% to an astronaut who does not exercise, so it may understate the loss. Fibre-level data from the same crew: Fitts et al. 2010 (PMC2988519).',
   },
   {
     id: 'balance_most_affected',
@@ -111,7 +111,7 @@ export const SOURCES: readonly SourceEntry[] = [
     status: 'VERIFIED',
     citation: 'NASA HRP, Hazard: Gravity Fields.',
     url: 'https://www.nasa.gov/hrp/hazard-gravity-fields/',
-    note: 'The page describes a six-month trek to Mars and Mars gravity as about one-third of Earth\'s; the model uses 0.38 g.',
+    note: 'The page describes a six-month trek to Mars and Mars gravity as about one-third of Earth\'s. The 0.38 g used in this app comes from the NASA Mars Fact Sheet (mean surface gravity 3.73 m/s2, 0.380 of Earth): https://nssdc.gsfc.nasa.gov/planetary/factsheet/marsfact.html',
   },
   {
     id: 'comm_delay',
@@ -127,7 +127,7 @@ export const SOURCES: readonly SourceEntry[] = [
     value: 'General adult references, not spaceflight-specific',
     status: 'VERIFY',
     citation: 'AHA (HR, BP), ADA (glucose), AASM/SRS (sleep >= 7 h), MedlinePlus (temperature).',
-    note: 'Green temperature 36.1-37.2 C matches MedlinePlus and green HR 60-100 matches AHA; yellow and red edges are team choices. AHA calls systolic 120-129 elevated, while this app keeps it green.',
+    note: 'Green temperature 36.1-37.2 C matches MedlinePlus and green HR 60-100 matches AHA; yellow and red edges are team choices. Systolic yellow starts at 120 to match the AHA elevated category.',
   },
   {
     id: 'partial_gravity_gap',
