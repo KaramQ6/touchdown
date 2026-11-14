@@ -4,6 +4,7 @@
   --color-space: #07090c;
   --color-panel: #0e1217;
   --color-line: #1c232c;
+  --color-edge: #566273; /* control borders: >= 3:1 on space and panel (WCAG 1.4.11) */
   --color-ink: #e6edf3;
   --color-dim: #7d8a99;
   --color-accent: #4cc9f0;

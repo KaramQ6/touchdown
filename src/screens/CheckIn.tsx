@@ -94,7 +94,7 @@ export function CheckIn({ onNavigate }: ScreenProps) {
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? `error-${field}` : undefined}
                   className={`border bg-space px-3 py-2.5 font-mono text-lg tabular-nums outline-none focus-visible:border-accent ${
-                    error ? 'border-bad' : 'border-line'
+                    error ? 'border-bad' : 'border-edge'
                   }`}
                 />
                 {error && (
@@ -111,7 +111,7 @@ export function CheckIn({ onNavigate }: ScreenProps) {
           <legend className="text-sm">
             Mood <span className="text-dim">(1 low, 5 high)</span>
           </legend>
-          <div role="radiogroup" aria-label="Mood" aria-describedby={errors?.mood ? 'error-mood' : undefined} className="flex gap-2">
+          <div role="group" aria-label="Mood" aria-describedby={errors?.mood ? 'error-mood' : undefined} className="flex gap-2">
             {MOODS.map((m) => {
               const checked = draft.mood === String(m)
               return (
@@ -119,11 +119,10 @@ export function CheckIn({ onNavigate }: ScreenProps) {
                   key={m}
                   id={m === 1 ? 'field-mood' : undefined}
                   type="button"
-                  role="radio"
-                  aria-checked={checked}
+                  aria-pressed={checked}
                   onClick={() => update('mood', String(m))}
                   className={`size-12 border font-mono text-lg tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
-                    checked ? 'border-accent bg-accent/10 text-accent' : 'border-line text-dim hover:text-ink'
+                    checked ? 'border-accent bg-accent/10 text-accent' : 'border-edge text-dim hover:text-ink'
                   }`}
                 >
                   {m}

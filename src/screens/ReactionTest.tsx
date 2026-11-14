@@ -114,13 +114,12 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
             <SourceBadge title="Reaction test" ids={['pvt_protocol', 'pvt_lapse', 'pvt_baseline']} />
           </div>
         </div>
-        <div role="radiogroup" aria-label="Test length" className="flex border border-line">
+        <div role="group" aria-label="Test length" className="flex border border-edge">
           {(Object.keys(PVT_DURATION_S) as Mode[]).map((m) => (
             <button
               key={m}
               type="button"
-              role="radio"
-              aria-checked={mode === m}
+              aria-pressed={mode === m}
               disabled={running}
               onClick={() => {
                 setMode(m)
@@ -141,6 +140,13 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
         tabIndex={running ? 0 : -1}
         aria-label={phase === 'stimulus' ? 'Signal on. Tap now.' : 'Wait for the signal, then tap or press space.'}
         onPointerDown={running ? respond : undefined}
+        onKeyDown={(e) => {
+          // Space is handled by the window listener; Enter completes the keyboard contract of role="button".
+          if (running && e.key === 'Enter' && !e.repeat) {
+            e.preventDefault()
+            respond()
+          }
+        }}
         className={`relative grid h-80 touch-none place-items-center overflow-hidden border select-none ${
           phase === 'stimulus' ? 'cursor-pointer border-accent bg-accent/15' : 'border-line bg-panel/80'
         } ${running ? 'cursor-pointer' : ''}`}
@@ -215,7 +221,7 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
             <button
               type="button"
               onClick={() => setPhase('idle')}
-              className="border border-line px-4 py-2 font-mono text-xs tracking-[0.15em] text-dim uppercase hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
+              className="border border-edge px-4 py-2 font-mono text-xs tracking-[0.15em] text-dim uppercase hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
             >
               Run again
             </button>

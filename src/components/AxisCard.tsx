@@ -14,7 +14,7 @@ interface AxisCardProps {
 export function AxisCard({ axis, title, value, driver, sourceIds, note }: AxisCardProps) {
   return (
     <article className="flex flex-col gap-3 border border-line bg-panel/80 p-5">
-      <header className="flex items-center justify-between">
+      <header className="flex items-start justify-between gap-3">
         <p className="font-mono text-[11px] tracking-[0.2em] text-dim uppercase">
           <span className="text-ink">{axis}</span> · {title}
         </p>

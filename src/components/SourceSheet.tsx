@@ -19,11 +19,26 @@ interface SourceSheetProps {
 /** SPEC M9: the "Why this number?" panel listing sources.ts entries. */
 export function SourceSheet({ title, ids, onClose }: SourceSheetProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLElement>(null)
   const entries = ids.map(sourceById).filter((e): e is SourceEntry => e !== undefined)
 
   useEffect(() => {
     closeRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return onClose()
+      if (e.key !== 'Tab' || !dialogRef.current) return
+      // Focus trap: Tab cycles inside the dialog (aria-modal).
+      const items = dialogRef.current.querySelectorAll<HTMLElement>('button, a[href]')
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
@@ -37,6 +52,7 @@ export function SourceSheet({ title, ids, onClose }: SourceSheetProps) {
         onClick={onClose}
       />
       <motion.aside
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="source-sheet-title"
@@ -56,7 +72,7 @@ export function SourceSheet({ title, ids, onClose }: SourceSheetProps) {
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="rounded-sm border border-line px-3 py-1 font-mono text-xs text-dim hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
+            className="rounded-sm border border-edge px-3 py-1 font-mono text-xs text-dim hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
           >
             Close
           </button>

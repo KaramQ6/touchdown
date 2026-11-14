@@ -24,7 +24,7 @@ export function SourceBadge({ title, ids }: SourceBadgeProps) {
         onClick={() => setOpen(true)}
         aria-label={`Why this number? ${title}`}
         title="Why this number?"
-        className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-line font-mono text-[11px] text-dim transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
+        className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-edge font-mono text-[11px] text-dim transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-accent"
       >
         ?
       </button>

@@ -206,7 +206,7 @@ export function Projection(_: ScreenProps) {
           type="button"
           onClick={() => setWhatIf({})}
           disabled={Object.keys(whatIf).length === 0}
-          className="border border-line px-4 py-2 font-mono text-xs tracking-[0.15em] text-dim uppercase transition-colors enabled:hover:text-ink disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-accent"
+          className="border border-edge px-4 py-2 font-mono text-xs tracking-[0.15em] text-dim uppercase transition-colors enabled:hover:text-ink disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-accent"
         >
           Reset
         </button>

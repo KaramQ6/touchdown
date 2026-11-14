@@ -119,11 +119,12 @@ export function BodyMap(_: ScreenProps) {
                   onClick={() => setPicked(r.id)}
                   aria-pressed={selectedId === r.id}
                   className={`flex items-center gap-2 border px-2.5 py-1 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
-                    selectedId === r.id ? 'border-ink text-ink' : 'border-line text-dim hover:text-ink'
+                    selectedId === r.id ? 'border-ink text-ink' : 'border-edge text-dim hover:text-ink'
                   }`}
                 >
                   <span aria-hidden className="size-2 rounded-full" style={{ background: STATUS_FILL[statuses[r.id]] }} />
                   {r.label}
+                  <span className="text-dim">· {STATUS_LABEL[statuses[r.id]]}</span>
                 </button>
               </li>
             ))}

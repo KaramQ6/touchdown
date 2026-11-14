@@ -1,13 +1,15 @@
-import { useState, type ComponentType } from 'react'
+import { lazy, Suspense, useState, type ComponentType } from 'react'
 import { Nav, type ScreenId, type ScreenProps } from './components/Nav'
 import { Home } from './screens/Home'
 import { CheckIn } from './screens/CheckIn'
 import { ReactionTest } from './screens/ReactionTest'
-import { Projection } from './screens/Projection'
 import { BodyMap } from './screens/BodyMap'
-import { Trends } from './screens/Trends'
 import { Escalation } from './screens/Escalation'
 import { useMission } from './store/mission'
+
+// Chart screens pull in Recharts; load them on demand (the service worker still precaches the chunks).
+const Projection = lazy(() => import('./screens/Projection').then((m) => ({ default: m.Projection })))
+const Trends = lazy(() => import('./screens/Trends').then((m) => ({ default: m.Trends })))
 
 const SCREEN_COMPONENTS: Record<ScreenId, ComponentType<ScreenProps>> = {
   home: Home,
@@ -26,17 +28,17 @@ function TopBar() {
   const resetDemo = useMission((s) => s.resetDemo)
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-panel px-4 md:px-6">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b md:gap-4 border-line bg-panel px-4 md:px-6">
       <span className="font-mono text-sm font-semibold tracking-[0.3em] text-accent">TOUCHDOWN</span>
-      <span className="hidden font-mono text-xs text-dim sm:inline">
+      <span className="hidden whitespace-nowrap font-mono text-xs text-dim md:inline">
         Day <span className="text-ink tabular-nums">{currentDay}</span> / <span className="tabular-nums">{landingDay}</span>
       </span>
       {isDemo && (
-        <span className="rounded-sm border border-dashed border-warn/60 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-warn uppercase">
+        <span className="shrink-0 whitespace-nowrap rounded-sm border border-dashed border-warn/60 px-2 py-0.5 font-mono text-[10px] tracking-[0.2em] text-warn uppercase">
           Demo data
         </span>
       )}
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex min-w-0 items-center gap-2">
         <label htmlFor="astronaut" className="sr-only">
           Astronaut
         </label>
@@ -44,7 +46,7 @@ function TopBar() {
           id="astronaut"
           value={activeId}
           onChange={(e) => setActive(e.target.value)}
-          className="max-w-44 border border-line bg-space px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-accent"
+          className="min-w-0 max-w-36 border md:max-w-44 border-edge bg-space px-2 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-accent"
         >
           {crew.map((a) => (
             <option key={a.id} value={a.id}>
@@ -55,7 +57,7 @@ function TopBar() {
         <button
           type="button"
           onClick={resetDemo}
-          className="border border-line px-3 py-1.5 font-mono text-xs text-dim transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
+          className="shrink-0 whitespace-nowrap border border-edge px-3 py-1.5 font-mono text-xs text-dim transition-colors hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
         >
           Reset demo
         </button>
@@ -66,6 +68,7 @@ function TopBar() {
 
 export default function App() {
   const [screen, setScreen] = useState<ScreenId>('home')
+  const activeId = useMission((s) => s.mission.activeId)
   const Screen = SCREEN_COMPONENTS[screen]
 
   return (
@@ -74,7 +77,10 @@ export default function App() {
       <div className="flex min-h-0 flex-1">
         <Nav active={screen} onSelect={setScreen} />
         <main className="min-w-0 flex-1 overflow-y-auto pb-16 md:pb-0">
-          <Screen onNavigate={setScreen} />
+          {/* Keyed by astronaut so a screen's local state (e.g. a Check-in draft) never carries over to another astronaut. */}
+          <Suspense fallback={<p className="p-10 font-mono text-sm text-dim">Loading</p>}>
+            <Screen key={activeId} onNavigate={setScreen} />
+          </Suspense>
         </main>
       </div>
     </div>

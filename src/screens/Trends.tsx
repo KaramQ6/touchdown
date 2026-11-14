@@ -87,13 +87,12 @@ export function Trends(_: ScreenProps) {
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Trends</h1>
         </div>
-        <div role="radiogroup" aria-label="Indicator" className="flex flex-wrap border border-line">
+        <div role="group" aria-label="Indicator" className="flex flex-wrap border border-edge">
           {INDICATORS.map((k) => (
             <button
               key={k}
               type="button"
-              role="radio"
-              aria-checked={key === k}
+              aria-pressed={key === k}
               onClick={() => setKey(k)}
               className={`px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-accent ${
                 key === k ? 'bg-accent/10 text-accent' : 'text-dim hover:text-ink'

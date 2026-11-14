@@ -45,7 +45,7 @@ export function TodayAction({ onNavigate }: ScreenProps) {
               <button
                 type="button"
                 onClick={() => onNavigate('checkin')}
-                className="border border-line px-3 py-1.5 font-mono text-xs tracking-[0.15em] text-dim uppercase hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
+                className="border border-edge px-3 py-1.5 font-mono text-xs tracking-[0.15em] text-dim uppercase hover:text-ink focus-visible:outline-2 focus-visible:outline-accent"
               >
                 Check in
               </button>

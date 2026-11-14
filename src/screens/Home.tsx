@@ -35,7 +35,7 @@ export function Home({ onNavigate }: ScreenProps) {
     return (
       <section className="p-6 md:p-10">
         <p className="text-dim">No check-in yet.</p>
-        <button type="button" onClick={() => onNavigate('checkin')} className="mt-4 border border-accent px-4 py-2 text-accent">
+        <button type="button" onClick={() => onNavigate('checkin')} className="mt-4 border border-accent px-4 py-2 text-accent focus-visible:outline-2 focus-visible:outline-accent">
           Start check-in
         </button>
       </section>
@@ -74,7 +74,7 @@ export function Home({ onNavigate }: ScreenProps) {
             <button
               type="button"
               onClick={() => onNavigate('escalation')}
-              className="flex min-w-0 items-center gap-3 border border-line px-4 py-2 text-left transition-colors hover:border-dim focus-visible:outline-2 focus-visible:outline-accent"
+              className="flex min-w-0 items-center gap-3 border border-edge px-4 py-2 text-left transition-colors hover:border-dim focus-visible:outline-2 focus-visible:outline-accent"
             >
               <span className={`font-mono text-xs font-semibold tracking-[0.15em] uppercase ${TONE_TEXT[levelTone]}`}>
                 Level {escalation.level} · {ACTION_LEVEL_CARDS[escalation.level].title}
@@ -88,7 +88,7 @@ export function Home({ onNavigate }: ScreenProps) {
 
       <TodayAction onNavigate={onNavigate} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {readiness.drivers.map(({ axis, text }) => (
           <AxisCard key={axis} axis={axis} value={readiness[axis]} driver={text} {...AXES[axis]} />
         ))}
