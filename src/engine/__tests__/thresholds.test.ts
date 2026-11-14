@@ -34,6 +34,12 @@ describe('indicatorBands: chart zones built from SPEC 6.1 thresholds', () => {
   })
 })
 
+describe('statusOf: missing or broken values', () => {
+  it.each(INDICATORS)('%s is red for NaN and infinities, never on track', (key) => {
+    for (const v of [Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) expect(statusOf(key, v), String(v)).toBe('red')
+  })
+})
+
 describe('indicatorValue', () => {
   it('reads systolic for bp', () => expect(indicatorValue('bp', makeLog({ systolic: 133 }))).toBe(133))
 })
@@ -150,6 +156,10 @@ const RANGES: [keyof VitalsInput, number, number][] = [
 
 describe('validateVitals: SPEC 6.3', () => {
   it('accepts a valid check-in', () => expect(validateVitals(valid)).toEqual({}))
+
+  it('rejects a fractional heart rate (beats are counted whole)', () => {
+    expect(validateVitals({ ...valid, heartRate: 72.5 })).toHaveProperty('heartRate')
+  })
 
   it.each(RANGES)('%s accepts %s and %s', (field, min, max) => {
     expect(validateVitals({ ...valid, [field]: min })).toEqual({})

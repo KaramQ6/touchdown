@@ -110,7 +110,7 @@ Do not change formulas to make the story bigger. Tune seed data only.
 |---|---|---|
 | All green | 0 | "All clear." |
 | Any yellow today | 1: Handle it myself | Guidance card for that indicator, re-check tomorrow |
-| Any red today, or same indicator yellow 3 days in a row | 2: Alert crew | Notify CMO, re-measure within 4 h |
+| Any red today, or same indicator not green (yellow or red) 3 days in a row | 2: Alert crew | Notify CMO, re-measure within 4 h |
 | Temp >= 38.5, or systolic >= 160, or glucose < 54, or same indicator red 2 days in a row | 3: Contact Earth | Summary for flight surgeon + comm-delay timer |
 
 Highest triggered level wins. Show which rule fired.
@@ -216,24 +216,26 @@ HR 30-220, systolic 60-250, diastolic 30-150, glucose 30-500, temp 33-42, sleep 
 ---
 
 ## 7. sources.ts (seed content; team will confirm links marked VERIFY)
+Updated 2026-11-14 after the research pass: every VERIFIED row below was opened and checked against its page. See `docs/research/`.
+
 | id | Value | Status | Citation / URL |
 |---|---|---|---|
 | bone_loss | 1-1.5%/month, model uses 1.25 | VERIFIED | NASA, Risk of Spaceflight-Induced Bone Changes. https://www.nasa.gov/reference/risk-of-spaceflight-induced-bone-changes/ . Note: varies by site (hip ~1.4-1.5%, spine ~0.9%, Lang et al. 2004). |
-| calf_strength | 7-20% peak force loss after ~6 months, model uses 20 | VERIFIED | Fitts et al. 2010, J Physiol. https://pmc.ncbi.nlm.nih.gov/articles/PMC2988519/ |
-| balance_most_affected | qualitative | VERIFIED | NASA One-Year Mission functional performance. https://nasa.gov/humans-in-space/nasas-one-year-mission-investigates-how-space-affects-astronauts-functional-performance |
+| calf_strength | model uses 20% (upper-end value) | VERIFY | Fitts et al. 2010, J Physiol. https://pmc.ncbi.nlm.nih.gov/articles/PMC2988519/ . The paper reports soleus type I fibre atrophy 20% and single-fibre peak force down 35% after ~180 days (n=9). It does not give a whole-muscle 7-20% figure; a whole-muscle source is still needed. |
+| balance_most_affected | balance-dependent tasks changed most (qualitative) | VERIFIED | NASA One-Year Mission functional performance. https://www.nasa.gov/humans-in-space/nasas-one-year-mission-investigates-how-space-affects-astronauts-functional-performance/ |
 | landing_readiness_tests | qualitative | VERIFIED | NASA, New tests evaluate mission readiness of astronauts upon landing. https://www.nasa.gov/humans-in-space/new-tests-evaluate-mission-readiness-of-astronauts-upon-landing/ |
-| no_combined_model | qualitative | VERIFIED | Wood et al., NASA NTRS. https://ntrs.nasa.gov/api/citations/20230014343/downloads/NSL%20IWS24%20Wood%20Predictors.pdf |
+| no_combined_model | predicting post-landing performance is still being studied (qualitative) | VERIFIED | Wood SJ et al., Assessing the Relationships Between Sensorimotor Biomarkers and Post-Landing Functional Task Performance, NASA HRP IWS 2024 (NTRS 20230014343). https://ntrs.nasa.gov/citations/20230014343 |
 | hrp_risks | official risk names | VERIFIED | NASA HRP Risks. https://www.nasa.gov/hrp/risks/ |
 | hrp_hazards | Gravity fields; Distance from Earth | VERIFIED | NASA HRP Hazards. https://www.nasa.gov/hrp/hazards/ |
 | exercise_halves_loss | factor 0.5 | ASSUMPTION | Team design choice, editable. |
-| exercise_target | 120 min/day | VERIFY | NASA states ISS crew exercise about 2 h/day; team adds link. |
+| exercise_target | 120 min/day | VERIFIED | NASA, Astronaut Exercise: ISS crews average about two hours of exercise per day. https://www.nasa.gov/missions/station/iss-research/astronaut-exercise/ |
 | weights | 0.40 / 0.35 / 0.25 | ASSUMPTION | Justified by FTT findings, not validated. |
 | coefficients | 3, 1.5, 150, 5 | ASSUMPTION | Calibrated to give a sensible 0-100 range. |
-| pvt_lapse | 500 ms | VERIFY | Standard PVT lapse threshold (Basner & Dinges 2011, Sleep). Team adds link. |
-| transit | ~6 months weightless transit | VERIFY | NASA HRP Gravity Fields hazard page. Team adds link. |
-| comm_delay | 3-22 min one-way | VERIFIED | Physics: Earth-Mars light time at closest/farthest distance. |
-| vitals_ranges | table 6.1 | VERIFY | AHA (HR, BP), ADA (glucose), AASM/SRS (sleep >= 7 h). Team adds links. |
-| partial_gravity_gap | effects of 0.38 g not directly studied in humans | VERIFIED | NASA HRP gap (GapMA-101). Shown as an honest limitation. |
+| pvt_lapse | 500 ms | VERIFIED | Basner M, Dinges DF. Maximizing Sensitivity of the PVT to Sleep Loss. Sleep 2011;34(5):581-591. https://pmc.ncbi.nlm.nih.gov/articles/PMC3079937/ . Defined for the 10-minute PVT; our test is shorter. |
+| transit | ~6 months weightless transit | VERIFIED | NASA HRP, Hazard: Gravity Fields ("six-month trek"). https://www.nasa.gov/hrp/hazard-gravity-fields/ |
+| comm_delay | 3-22 min one-way | VERIFY | Physics: Earth-Mars light time at closest/farthest distance (about 3.1 min at 56 million km, 22.3 min at 401 million km). No published page cited yet. |
+| vitals_ranges | table 6.1 | VERIFY | AHA (HR, BP), ADA (glucose), AASM/SRS (sleep >= 7 h), MedlinePlus (temp). Green temp 36.1-37.2 C matches MedlinePlus and green HR 60-100 matches AHA; yellow and red edges are team choices. AHA calls systolic 120-129 "elevated", while table 6.1 keeps it green. |
+| partial_gravity_gap | long-duration effects at 0.38 g not studied in humans | VERIFY | NASA Human Research Roadmap (gap ID not confirmed). Short partial-gravity exposures have been tested, so the claim is limited to long stays. Shown as an honest limitation. |
 | recommend_rules | candidates and 1-point minimum gain | ASSUMPTION | Team design choice for decision support. |
 
 ---

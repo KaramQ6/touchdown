@@ -3,6 +3,8 @@ import type { DailyLog, IndicatorKey, Source, Status } from './types'
 
 /** SPEC 6.1: status of one indicator value. For 'bp' the value is systolic. */
 export function statusOf(key: IndicatorKey, value: number): Status {
+  // A missing or broken value is never "on track".
+  if (!Number.isFinite(value)) return 'red'
   switch (key) {
     case 'hr': {
       const t = VITALS.hr
@@ -109,7 +111,7 @@ export function validateVitals(input: VitalsInput): VitalsErrors {
   for (const field of Object.keys(VALIDATION_RANGES) as VitalField[]) {
     const { min, max, unit, label } = VALIDATION_RANGES[field]
     const value = input[field]
-    const integerOnly = field === 'mood'
+    const integerOnly = field === 'mood' || field === 'heartRate'
     if (!Number.isFinite(value) || value < min || value > max || (integerOnly && !Number.isInteger(value))) {
       errors[field] = `${label} must be ${integerOnly ? 'a whole number ' : ''}between ${min} and ${max}${unit ? ` ${unit}` : ''}.`
     }

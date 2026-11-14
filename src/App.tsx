@@ -1,5 +1,6 @@
 import { lazy, Suspense, useState, type ComponentType } from 'react'
 import { Nav, type ScreenId, type ScreenProps } from './components/Nav'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Home } from './screens/Home'
 import { CheckIn } from './screens/CheckIn'
 import { ReactionTest } from './screens/ReactionTest'
@@ -78,9 +79,12 @@ export default function App() {
         <Nav active={screen} onSelect={setScreen} />
         <main className="min-w-0 flex-1 overflow-y-auto pb-16 md:pb-0">
           {/* Keyed by astronaut so a screen's local state (e.g. a Check-in draft) never carries over to another astronaut. */}
-          <Suspense fallback={<p className="p-10 font-mono text-sm text-dim">Loading</p>}>
-            <Screen key={activeId} onNavigate={setScreen} />
-          </Suspense>
+          {/* Keyed so switching screen or astronaut retries after an error. */}
+          <ErrorBoundary key={`${screen}-${activeId}`}>
+            <Suspense fallback={<p className="p-10 font-mono text-sm text-dim">Loading</p>}>
+              <Screen key={activeId} onNavigate={setScreen} />
+            </Suspense>
+          </ErrorBoundary>
         </main>
       </div>
     </div>

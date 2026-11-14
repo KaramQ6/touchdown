@@ -4,6 +4,7 @@ import { projectLanding } from '../../engine/projection'
 import { recommend } from '../../engine/recommend'
 import { baselineRt, computeReadiness, exerciseAdherence } from '../../engine/score'
 import { indicatorStatuses, validateVitals } from '../../engine/thresholds'
+import { round2 } from '../../engine/__tests__/helpers'
 import { DEMO_FEVER_C, createSeedMission } from '../seed-crew'
 
 const mission = createSeedMission()
@@ -80,32 +81,32 @@ describe('hero astronaut matches SPEC 4.5', () => {
 })
 
 describe('demo story targets (SPEC 4.5, PROMPTS 2)', () => {
-  it('R_now is Limited, within 0.5 of 54.99', () => {
+  it('R_now is Limited at exactly 54.99', () => {
     const r = computeReadiness(hero.logs, mission.currentDay)!
     expect(r.band).toBe('limited')
-    expect(Math.abs(r.R - 54.99)).toBeLessThanOrEqual(0.5)
+    expect(round2(r.R)).toBe(54.99)
   })
 
-  it('R_land is Not Ready, within 0.5 of 48.86', () => {
+  it('R_land is Not Ready at exactly 48.86', () => {
     const p = projectLanding(hero.logs, days)!
     expect(p.band).toBe('not-ready')
-    expect(Math.abs(p.rLand - 48.86)).toBeLessThanOrEqual(0.5)
+    expect(round2(p.rLand)).toBe(48.86)
   })
 
-  it('R_land with what-if (exercise 120, sleep 8) is Limited, within 0.5 of 58.32', () => {
+  it('R_land with what-if (exercise 120, sleep 8) is Limited at exactly 58.32', () => {
     const p = projectLanding(hero.logs, { ...days, whatIf: { exerciseMin: 120, sleepHours: 8 } })!
     expect(p.band).toBe('limited')
-    expect(Math.abs(p.rLand - 58.32)).toBeLessThanOrEqual(0.5)
+    expect(round2(p.rLand)).toBe(58.32)
   })
 })
 
 describe('hero Today\'s Action (recommend, SPEC 4.5)', () => {
-  it('suggests exercise 120 + sleep 7, after within 0.01 of 58.32, Limited', () => {
+  it('suggests exercise 120 + sleep 7, after at exactly 58.32, Limited', () => {
     const rec = recommend(hero.logs, days)
     expect(rec?.kind).toBe('change')
     if (rec?.kind !== 'change') return
     expect(rec.change).toEqual({ exerciseMin: 120, sleepHours: 7 })
     expect(rec.after.band).toBe('limited')
-    expect(Math.abs(rec.after.rLand - 58.32)).toBeLessThanOrEqual(0.01)
+    expect(round2(rec.after.rLand)).toBe(58.32)
   })
 })

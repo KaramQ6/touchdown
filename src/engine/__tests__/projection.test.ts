@@ -54,6 +54,16 @@ describe('SPEC 4.5 demo story (engine level)', () => {
 })
 
 describe('projection curve: SPEC 4.3', () => {
+  it('returns null when landing day is before today (nothing to project)', () => {
+    expect(projectLanding(storyLogs(), { currentDay: 140, landingDay: 139 })).toBeNull()
+  })
+
+  it('landing today is a one-point curve equal to today', () => {
+    const p = projectLanding(storyLogs(), { currentDay: 140, landingDay: 140 })!
+    expect(p.curve).toHaveLength(1)
+    expect(p.rLand).toBe(p.curve[0].R)
+  })
+
   it('has one point per day from currentDay to landingDay inclusive', () => {
     const { curve } = projectLanding(storyLogs(), mission)!
     expect(curve).toHaveLength(71)

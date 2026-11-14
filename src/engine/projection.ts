@@ -18,6 +18,7 @@ export interface Projection {
 
 /** SPEC 4.3: project R to landing day. Only M changes with time; S and V stay at today's values. */
 export function projectLanding(logs: readonly DailyLog[], opts: ProjectionOptions): Projection | null {
+  if (opts.landingDay < opts.currentDay) return null
   const inputs = readinessInputs(logs)
   if (!inputs) return null
   const { exerciseMin, sleepHours } = opts.whatIf ?? {}

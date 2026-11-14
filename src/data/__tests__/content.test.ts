@@ -5,24 +5,24 @@ import { ACTION_LEVEL_CARDS, INDICATOR_GUIDANCE } from '../action-cards'
 import { BODY_REGIONS } from '../body-regions'
 import { SOURCES, sourceById } from '../sources'
 
-// SPEC section 7, statuses exactly as given.
+// SPEC section 7, statuses exactly as given (updated after the research pass, 2026-11-14).
 const SPEC_7: [string, 'VERIFIED' | 'ASSUMPTION' | 'VERIFY'][] = [
   ['bone_loss', 'VERIFIED'],
-  ['calf_strength', 'VERIFIED'],
+  ['calf_strength', 'VERIFY'],
   ['balance_most_affected', 'VERIFIED'],
   ['landing_readiness_tests', 'VERIFIED'],
   ['no_combined_model', 'VERIFIED'],
   ['hrp_risks', 'VERIFIED'],
   ['hrp_hazards', 'VERIFIED'],
   ['exercise_halves_loss', 'ASSUMPTION'],
-  ['exercise_target', 'VERIFY'],
+  ['exercise_target', 'VERIFIED'],
   ['weights', 'ASSUMPTION'],
   ['coefficients', 'ASSUMPTION'],
-  ['pvt_lapse', 'VERIFY'],
-  ['transit', 'VERIFY'],
-  ['comm_delay', 'VERIFIED'],
+  ['pvt_lapse', 'VERIFIED'],
+  ['transit', 'VERIFIED'],
+  ['comm_delay', 'VERIFY'],
   ['vitals_ranges', 'VERIFY'],
-  ['partial_gravity_gap', 'VERIFIED'],
+  ['partial_gravity_gap', 'VERIFY'],
 ]
 
 describe('sources.ts', () => {
@@ -42,6 +42,10 @@ describe('sources.ts', () => {
 
   it('VERIFIED rows backed by a page carry an https link', () => {
     for (const s of SOURCES.filter((s) => s.url)) expect(s.url).toMatch(/^https:\/\//)
+  })
+
+  it('every VERIFIED row has a link to the page it was checked against', () => {
+    for (const s of SOURCES.filter((s) => s.status === 'VERIFIED')) expect(s.url, s.id).toBeDefined()
   })
 })
 

@@ -1,7 +1,7 @@
 import type { DailyLog } from '../types'
 
 /** SPEC 4.4: golden values are compared rounded to 2 decimals. */
-export const round2 = (x: number) => Math.round((x + Number.EPSILON) * 100) / 100
+export const round2 = (x: number) => Math.round(x * 100 + 1e-9) / 100
 
 /** An all-green log; override only what a test cares about. */
 export function makeLog(overrides: Partial<DailyLog> = {}): DailyLog {

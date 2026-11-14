@@ -33,6 +33,12 @@ describe('evaluateEscalation: SPEC 4.6', () => {
     expect(e.rule).toMatch(/3 days in a row/)
   })
 
+  it('level 2 rule says "not green", since a red day can sit inside the run', () => {
+    const e = evaluateEscalation(makeDays(12, [YELLOW_HR, YELLOW_HR, YELLOW_HR]))
+    expect(e.rule).toMatch(/not green 3 days in a row/)
+    expect(e.rule).not.toMatch(/yellow/)
+  })
+
   it('stays level 1 when yellow only 2 days in a row', () => {
     expect(evaluateEscalation(makeDays(12, [{}, YELLOW_HR, YELLOW_HR])).level).toBe(1)
   })

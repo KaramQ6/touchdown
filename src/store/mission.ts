@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware'
 import { createSeedMission } from '../data/seed-crew'
 import type { Astronaut, DailyLog, Mission, PvtResult } from '../engine/types'
 import { ESCALATION } from '../engine/constants'
+import { restoreState, type PersistedState } from './persisted'
 
 export const STORAGE_KEY = 'touchdown-mission'
 
@@ -72,6 +73,8 @@ function saveLog(s: MissionState, log: DailyLog, isCheckIn: boolean): Partial<Mi
   return next
 }
 
+const seedState = (): PersistedState => ({ mission: createSeedMission(), isDemo: true, commitments: {}, remeasureDueAt: {} })
+
 export const useMission = create<MissionState>()(
   persist(
     (set, get) => ({
@@ -100,8 +103,7 @@ export const useMission = create<MissionState>()(
           if (s.remeasureDueAt[id] !== undefined) return {}
           return { remeasureDueAt: { ...s.remeasureDueAt, [id]: now + ESCALATION.remeasureHours * HOUR_MS } }
         }),
-      resetDemo: () =>
-        set({ mission: createSeedMission(), isDemo: true, whatIf: {}, commitments: {}, remeasureDueAt: {} }),
+      resetDemo: () => set({ ...seedState(), whatIf: {} }),
     }),
     {
       name: STORAGE_KEY,
@@ -113,6 +115,7 @@ export const useMission = create<MissionState>()(
         commitments,
         remeasureDueAt,
       }),
+      merge: (saved, current) => ({ ...current, ...restoreState(saved, seedState) }),
     },
   ),
 )

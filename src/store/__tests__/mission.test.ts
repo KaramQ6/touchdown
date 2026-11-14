@@ -221,3 +221,54 @@ describe('mission store', () => {
     })
   })
 })
+
+describe('loading saved state (trust boundary)', () => {
+  const save = (state: unknown) => localStorage.setItem(STORAGE_KEY, JSON.stringify({ state, version: 1 }))
+  const seeded = () => ({ mission: createSeedMission(), isDemo: true, commitments: {}, remeasureDueAt: {} })
+  const reload = async (state: unknown) => {
+    save(state)
+    await useMission.persist.rehydrate()
+  }
+
+  it('keeps a valid saved mission', async () => {
+    const saved = seeded()
+    const active = saved.mission.crew[0]
+    active.logs[active.logs.length - 1] = { ...active.logs.at(-1)!, sleepHours: 8 }
+    await reload(saved)
+    expect(today().sleepHours).toBe(8)
+  })
+
+  it.each([
+    ['no crew', (m: ReturnType<typeof createSeedMission>) => ({ ...m, crew: undefined })],
+    ['empty crew', (m: ReturnType<typeof createSeedMission>) => ({ ...m, crew: [] })],
+    ['logs not a list', (m: ReturnType<typeof createSeedMission>) => ({ ...m, crew: [{ ...m.crew[0], logs: 'x' }, ...m.crew.slice(1)] })],
+    [
+      'a log value that is not a number',
+      (m: ReturnType<typeof createSeedMission>) => {
+        const logs = [...m.crew[0].logs]
+        logs[logs.length - 1] = { ...logs.at(-1)!, heartRate: null as unknown as number }
+        return { ...m, crew: [{ ...m.crew[0], logs }, ...m.crew.slice(1)] }
+      },
+    ],
+    ['no current day', (m: ReturnType<typeof createSeedMission>) => ({ ...m, currentDay: 'x' })],
+  ])('falls back to the seed when the saved mission has %s', async (_, breakIt) => {
+    state().addLog({ ...today(), sleepHours: 8 })
+    await reload({ ...seeded(), mission: breakIt(createSeedMission()) })
+    expect(state().mission).toEqual(createSeedMission())
+    expect(state().isDemo).toBe(true)
+  })
+
+  it('repairs an unknown activeId to the first astronaut, so saves land where the screen reads', async () => {
+    const saved = seeded()
+    await reload({ ...saved, mission: { ...saved.mission, activeId: 'ghost' } })
+    expect(state().mission.activeId).toBe(saved.mission.crew[0].id)
+    state().addLog({ ...today(), sleepHours: 8 })
+    expect(today().sleepHours).toBe(8)
+  })
+
+  it('drops commitments and re-measure clocks that are not plain objects', async () => {
+    await reload({ ...seeded(), commitments: 'x', remeasureDueAt: [1] })
+    expect(state().commitments).toEqual({})
+    expect(state().remeasureDueAt).toEqual({})
+  })
+})

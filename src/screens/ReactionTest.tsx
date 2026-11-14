@@ -24,7 +24,7 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
   const astronaut = useActiveAstronaut()
 
   const [mode, setMode] = useState<Mode>('full')
-  const [phase, setPhase] = useState<Phase>('idle')
+  const [phase, setPhaseState] = useState<Phase>('idle')
   const [secondsLeft, setSecondsLeft] = useState<number>(PVT_DURATION_S.full)
   const [flash, setFlash] = useState<Flash>(null)
   const [result, setResult] = useState<Result | null>(null)
@@ -33,6 +33,13 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
   const stimulusAt = useRef(0)
   const endAt = useRef(0)
   const timers = useRef<{ stimulus?: number; end?: number; tick?: number }>({})
+  // Mirrors `phase` synchronously, so a tap between a timer firing and the next render reads the true phase.
+  const phaseRef = useRef<Phase>('idle')
+  const setPhase = useCallback((next: Phase) => {
+    phaseRef.current = next
+    if (next === 'stimulus') stimulusAt.current = performance.now()
+    setPhaseState(next)
+  }, [])
 
   const clearTimers = () => {
     window.clearTimeout(timers.current.stimulus)
@@ -45,12 +52,11 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
     window.clearTimeout(timers.current.stimulus)
     setPhase('wait')
     timers.current.stimulus = window.setTimeout(() => setPhase('stimulus'), nextStimulusDelayMs(Math.random))
-  }, [])
+  }, [setPhase])
 
-  // Stamp at commit so a response is never timed from a stale value, then refine to the painted frame.
+  // Stamped when the timer fires (setPhase), then refined to the painted frame.
   useLayoutEffect(() => {
     if (phase !== 'stimulus') return
-    stimulusAt.current = performance.now()
     const frame = requestAnimationFrame(() => (stimulusAt.current = performance.now()))
     return () => cancelAnimationFrame(frame)
   }, [phase])
@@ -60,7 +66,7 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
     const summary = summarizePvt(responses.current)
     setResult({ summary, saved: summary ? setTodayPvt(summary) : false })
     setPhase('done')
-  }, [setTodayPvt])
+  }, [setTodayPvt, setPhase])
 
   const start = () => {
     responses.current = []
@@ -78,6 +84,7 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
   }
 
   const respond = useCallback(() => {
+    const phase = phaseRef.current
     if (phase === 'wait') {
       responses.current.push({ kind: 'false-start' })
       setFlash({ kind: 'early' })
@@ -88,7 +95,7 @@ export function ReactionTest({ onNavigate }: ScreenProps) {
       setFlash({ kind: 'rt', ms })
       scheduleStimulus()
     }
-  }, [phase, scheduleStimulus])
+  }, [scheduleStimulus])
 
   useEffect(() => {
     if (phase !== 'wait' && phase !== 'stimulus') return

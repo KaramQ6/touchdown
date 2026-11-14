@@ -60,9 +60,9 @@ export function evaluateEscalation(logs: readonly DailyLog[]): Escalation {
   const redToday = INDICATORS.find((k) => status[k] === 'red')
   if (redToday) return level2(`${label(redToday)} is red today`, redToday)
   for (const k of INDICATORS) {
-    // A red day inside the run still counts as "at least yellow".
+    // A red day inside the run still counts, so the label says "not green".
     if (streak(sorted, k, E.yellowStreakDays, (s) => s !== 'green'))
-      return level2(`${label(k)} yellow ${E.yellowStreakDays} days in a row`, k)
+      return level2(`${label(k)} not green ${E.yellowStreakDays} days in a row`, k)
   }
 
   // Level 1: handle it myself
